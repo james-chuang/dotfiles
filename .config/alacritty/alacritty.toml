@@ -1,0 +1,18 @@
+[window]
+padding = { x = 0, y = 2}
+startup_mode = "Fullscreen"
+
+[font]
+normal = {family = "Hack Nerd Font"}
+
+[mouse]
+hide_when_typing = true
+
+[keyboard]
+bindings = [
+    { key = "F11", action = "ToggleFullscreen"},
+    { key = "C", mods = "Alt | Control", action = "Copy"},
+    { key = "V", mods = "Alt | Control", action = "Paste"},
+    { key = "/", mods = "Control", action = "IncreaseFontSize"},
+    { key = "0", mods = "Control", action = "ResetFontSize"},
+]
