@@ -1,48 +1,14 @@
 --[[
 
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
+Modified from kickstart.nvim: https://github.com/nvim-lua/kickstart.nvim
 
-Kickstart.nvim is *not* a distribution.
+Lua quickstart: https://learnxinyminutes.com/docs/lua/
 
-Kickstart.nvim is a template for your own configuration.
-  The goal is that you can read every line of code, top-to-bottom, understand
-  what your configuration is doing, and modify it to suit your needs.
+`:help lua-guide`: https://neovim.io/doc/user/lua-guide.html
 
-  Once you've done that, you should start exploring, configuring and tinkering to
-  explore Neovim!
-
-  If you don't know anything about Lua, I recommend taking some time to read through
-  a guide. One possible example:
-  - https://learnxinyminutes.com/docs/lua/
-
-
-  And then you can explore or search through `:help lua-guide`
-  - https://neovim.io/doc/user/lua-guide.html
-
-
-Kickstart Guide:
-
-I have left several `:help X` comments throughout the init.lua
-You should run that command and read that help section for more information.
-
-In addition, I have some `NOTE:` items throughout the file.
-These are for you, the reader to help understand what is happening. Feel free to delete
-them once you know what you're doing, but they should serve as a guide for when you
-are first encountering a few different constructs in your nvim config.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now :)
 --]]
 
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+require("config.global")
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -281,7 +247,45 @@ require('lazy').setup({
       config = function()
         vim.cmd('let g:slime_target = "tmux"')
       end,
-    }
+    },
+
+    {
+      "kylechui/nvim-surround",
+      event = "VeryLazy",
+      opts = {}
+    },
+
+    {
+      "quarto-dev/quarto-nvim",
+      dev = false,
+      dependencies = {
+        {
+          "jmbuhr/otter.nvim",
+          dev = false,
+          dependencies = {
+            { "neovim/nvim-lspconfig" },
+          },
+          opts = {
+            -- lsp = {
+            --   hover = {
+            --     border = require("misc.style").border,
+            --   },
+            -- },
+            buffers = {
+              -- if set to true, the filetype of the otterbuffers will be set.
+              -- otherwise only the autocommand of lspconfig that attaches
+              -- the language server will be executed without setting the filetype
+              set_filetype = true,
+            },
+          },
+        },
+      },
+      opts = {
+        lspFeatures = {
+          languages = { "r", "python", "julia", "bash", "lua", "html", "dot" },
+        },
+      },
+    },
   },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
@@ -297,60 +301,6 @@ require('lazy').setup({
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
 }, {})
-
--- [[ Setting options ]]
--- See `:help vim.o`
--- NOTE: You can change these options as you wish!
-
--- Set highlight on search
-vim.o.hlsearch = true
-
--- Highlight current line
-vim.o.cursorline = true
-
--- Scroll before hitting edge
-vim.o.scrolloff = 20
-
--- Make line numbers default
-vim.wo.number = true
-
--- Mimic bash autocompletion
-vim.o.wildmode = "longest,list,full"
-
--- Hide mode since it's already shown in lualine
-vim.o.showmode = false
-
-
--- Enable mouse mode
-vim.o.mouse = 'a'
-
--- Sync clipboard between OS and Neovim.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
-vim.o.clipboard = 'unnamedplus'
-
--- Enable break indent
-vim.o.breakindent = true
-
--- Save undo history
-vim.o.undofile = true
-
--- Case-insensitive searching UNLESS \C or capital in search
-vim.o.ignorecase = true
-vim.o.smartcase = true
-
--- Keep signcolumn on by default
-vim.wo.signcolumn = 'yes'
-
--- Decrease update time
-vim.o.updatetime = 250
-vim.o.timeoutlen = 300
-
--- Set completeopt to have a better completion experience
-vim.o.completeopt = 'menuone,noselect'
-
--- NOTE: You should make sure your terminal supports this
-vim.o.termguicolors = true
 
 -- [[ Basic Keymaps ]]
 
@@ -465,7 +415,30 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = {
+      'python',
+      'r',
+      -- 'julia',
+      'markdown',
+      'markdown_inline',
+      'bash',
+      'yaml',
+      'lua',
+      'vim',
+      'query',
+      'vimdoc',
+      'latex',
+      'html',
+      'css',
+      'dot',
+      'rust',
+      -- 'c',
+      -- 'cpp',
+      -- 'go',
+      -- 'tsx',
+      -- 'javascript',
+      -- 'typescript',
+    },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -475,7 +448,17 @@ vim.defer_fn(function()
     ignore_install = {},
     -- You can specify additional Treesitter modules here: -- For example: -- playground = {--enable = true,-- },
     modules = {},
-    highlight = { enable = true },
+    -- highlight = { enable = true },
+    highlight = {
+      enable = true,
+      additional_vim_regex_highlighting = false,
+      -- optional (with quarto-vim extension and pandoc-syntax)
+      -- additional_vim_regex_highlighting = { 'markdown' },
+
+      -- note: the vim regex based highlighting from
+      -- quarto-vim / vim-pandoc sets the wrong comment character
+      -- for some sections where there is `$` math.
+    },
     indent = { enable = true },
     incremental_selection = {
       enable = true,
@@ -563,7 +546,7 @@ local on_attach = function(_, bufnr)
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
   -- default <C-k> conflicts with vim-tmux-navigator
-  nmap('<C-i>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  -- nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
@@ -613,7 +596,7 @@ require('mason-lspconfig').setup()
 local servers = {
   -- clangd = {},
   -- gopls = {},
-  -- pyright = {},
+  pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
